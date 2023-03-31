@@ -5,25 +5,45 @@ states = ("1", "2", "3")
 input_symbols = ("a", "b", "c")
 transition_function = {
                         "1" : [("a" , "3"), ("a" , "2")],
-                        "2" : [("b" , "3"), ("ε", "2")],
+                        "2" : [("b" , "3"), ("ε", "3"), ("ε", "2")],
                         "3" : [("c" , "3")]
                         }
-initial_state = "1"
+initial_state = ("1")
 final_states = ("3")
 
-transicoes = dict()
-transicoes = transition_function.copy()
+transicoes_finais = dict()
+transicoes_finais = transition_function.copy()
 transicoes_vazias = dict()
 for estado in transition_function:
-    transicoes[estado] = []
+    transicoes_finais[estado] = []
     transicoes_vazias[estado] = [] 
     for transicao in transition_function.get(estado):
         if transicao[0] != "ε":
-            transicoes[estado].append(transicao)
+            transicoes_finais[estado].append(transicao)
         else:
-            transicoes_vazias[estado].append(transicao)
+            transicoes_vazias[estado].append(transicao)     
+
+transicoes_finais = dict()
+print(transicoes_vazias)
+while transicoes_vazias:
+    for estado in transicoes_vazias:
+        transicoes_finais[estado] = []
+        if len(transicoes_vazias.get(estado)) != 0:
+            for transicoes in transicoes_vazias.get(estado): # para cada transição dentre as transições vazias do estado x   
+                transicoes_do_destino = transition_function.get(transicoes[1]) # recebe todas as transições que um estado alcançavel y tem
+                print(f"transicoes_do_destino = {transicoes_do_destino}")
+                # Procure nas novas transições as que são vazias e então adicione-as a lista de transições vazias
+                for transicao_destino in transicoes_do_destino:
+                    if transicao_destino[0] == "ε":
+                        #transicoes_vazias[estado].append(transicao_destino)
+                        pass
+                    else:
+                        transicoes_finais[estado].append(transicoes_do_destino) # adicionando as novas transições ao conjunto de transições finais
+                print(transicoes_finais)
+    break
             
-#while transicoes_vazias:
+            
+            
     # print(transicoes_vazias)
     # for estado_origem in transicoes_vazias:
         
@@ -43,12 +63,12 @@ def convert_afne_to_afn(transitions):
         print(f"estado = {state}, transicoes = {transicoes}")
         for symbol, destination in transicoes:
             print(f"symbol = {symbol}, destinations = {destination}")
-            # for destination in destinations:
-            if symbol == "ε":
-                continue
+            # Remove as transições vazias
+                # if symbol == "ε":
+                #     continue
             if state not in afn_transitions:
                 afn_transitions[state] = []
-            afn_transitions[state].append((symbol, destination))
+                # afn_transitions[state].append((symbol, destination))
             if destination not in afn_transitions:
                 afn_transitions[destination] = []
             if "ε" in transicoes:
@@ -62,7 +82,7 @@ def convert_afne_to_afn(transitions):
     return afn_transitions                
         
                 
-print(convert_afne_to_afn(transition_function))              
+# print(convert_afne_to_afn(transition_function)) #             
                 
                 
               
