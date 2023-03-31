@@ -1,0 +1,12 @@
+# To use one of these, copy it and overwrite those variables into automata.py's "header"
+
+# This automata accepts all strings with 01.
+states = ("1", "2", "3")
+input_symbols = ("0", "1")
+transition_function = {
+                        "1" : {"0" : "2"},
+                        "2" : {"1" : "3"},
+                        "3" : {"0" : "3", "1" : "3"}
+                        }
+initial_state = "1"
+final_states = ("3")
