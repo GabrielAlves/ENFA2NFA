@@ -1,120 +1,16 @@
 # NFA: Non-Deterministic Finite Automation
 
 # This automata accepts all strings with 01.
-states = ("1", "2", "3")
-input_symbols = ("a", "b", "c")
+states = ("0", "1", "2", "3")
+input_symbols = ("0", "1")
 transition_function = {
-                        "1" : [("a" , "3"), ("a" , "2")],
-                        "2" : [("b" , "3"), ("ε", "3"), ("ε", "2")],
-                        "3" : [("c" , "3")]
+                        "0" : [("ε" , "1"), ("ε" , "2")],
+                        "1" : [("0" , "1"), ("1" , "3")],
+                        "2" : [("0" , "3"), ("1" , "2")],
+                        "3" : []
                         }
-initial_state = ("1")
-final_states = ("3")
-
-transicoes_finais = dict()
-transicoes_finais = transition_function.copy()
-transicoes_vazias = dict()
-for estado in transition_function:
-    transicoes_finais[estado] = []
-    transicoes_vazias[estado] = [] 
-    for transicao in transition_function.get(estado):
-        if transicao[0] != "ε":
-            transicoes_finais[estado].append(transicao)
-        else:
-            transicoes_vazias[estado].append(transicao)     
-
-transicoes_finais = dict()
-print(transicoes_vazias)
-while transicoes_vazias:
-    for estado in transicoes_vazias:
-        transicoes_finais[estado] = []
-        if len(transicoes_vazias.get(estado)) != 0:
-            for transicoes in transicoes_vazias.get(estado): # para cada transição dentre as transições vazias do estado x   
-                transicoes_do_destino = transition_function.get(transicoes[1]) # recebe todas as transições que um estado alcançavel y tem
-                print(f"transicoes_do_destino = {transicoes_do_destino}")
-                # Procure nas novas transições as que são vazias e então adicione-as a lista de transições vazias
-                for transicao_destino in transicoes_do_destino:
-                    if transicao_destino[0] == "ε":
-                        #transicoes_vazias[estado].append(transicao_destino)
-                        pass
-                    else:
-                        transicoes_finais[estado].append(transicoes_do_destino) # adicionando as novas transições ao conjunto de transições finais
-                print(transicoes_finais)
-    break
-            
-            
-            
-    # print(transicoes_vazias)
-    # for estado_origem in transicoes_vazias:
-        
-    #     pass
-    # break
-    #(origem, destino) = transicoes_vazias.pop()
-    # for (nova_origem, simbolo, nova_destino) in transicoes:
-    #    if nova_destino == origem:
-    #         nova_transition = (nova_origem, simbolo, destino)
-    #         if nova_transition not in transicoes:
-    #             transicoes.add(nova_transition)
-    #             transicoes_vazias.add((nova_origem, destino))
-                
-def convert_afne_to_afn(transitions):
-    afn_transitions = {}
-    for state, transicoes in transitions.items():
-        print(f"estado = {state}, transicoes = {transicoes}")
-        for symbol, destination in transicoes:
-            print(f"symbol = {symbol}, destinations = {destination}")
-            # Remove as transições vazias
-                # if symbol == "ε":
-                #     continue
-            if state not in afn_transitions:
-                afn_transitions[state] = []
-                # afn_transitions[state].append((symbol, destination))
-            if destination not in afn_transitions:
-                afn_transitions[destination] = []
-            if "ε" in transicoes:
-                for e_destination in transicoes["ε"]:
-                    afn_transitions[state].append((symbol, e_destination))
-                    if e_destination not in afn_transitions:
-                        afn_transitions[e_destination] = []
-                    afn_transitions[e_destination].append(("ε", destination))
-            else:
-                afn_transitions[destination].append(("ε", destination))
-    return afn_transitions                
-        
-                
-# print(convert_afne_to_afn(transition_function)) #             
-                
-                
-              
-
-
-
-
-def removeTransicaoVazia(transicoes_com_vazio, numero_de_estados):
-    # Transforma um conjunto de transições de um AFNe em um conjunto de transições de um AFN, sem transições vazias.
-    # Cria uma cópia das transições originais, sem as transições vazias
-    transicoes = dict()
-
-    transicoes = transition_function.copy()
-    for estado in transition_function:
-        transicoes[estado] = [] 
-        for transicao in transition_function.get(estado):
-            if transicao[0] != "ε":
-                transicoes[estado].append(transicao)
-    
-    # Cria cópias das transições com transições vazias, conectando os estados de origem aos estados de destino diretamente
-    transicao_vazia = {(origem, destino) for (origem, simbolo, destino) in transicao_vazia if simbolo == "e"}
-    while transicao_vazia:
-        (origem, destino) = transicao_vazia.pop()
-        for (nova_origem, simbolo, nova_destino) in transicoes:
-            if nova_destino == origem:
-                nova_transition = (nova_origem, simbolo, destino)
-                if nova_transition not in transicoes:
-                    transicoes.add(nova_transition)
-                    transicao_vazia.add((nova_origem, destino))
-    
-    return transicoes
-    
+initial_state = ["0"]
+final_states = ["3"]
 
 class NFA:
     def __init__(self, _states, _input_symbols, _transition_function, _initial_state, _final_states):
@@ -123,7 +19,7 @@ class NFA:
         self.transition_function = _transition_function # funções de transição 
         self.initial_state = _initial_state # estado inicial
         self.final_states = _final_states # estados finais
-        self.current_states = set([_initial_state])
+        self.current_states = set(initial_state)
 
     def process_word(self, word):
         for input in word:
@@ -164,14 +60,70 @@ class NFA:
                 return True
 
         return False
+    
+    def removeTransicaoVazia(self):
+        transicoes_finais = dict()
+        transicoes_finais = transition_function.copy()
+        transicoes_nao_vazias = dict()
+        transicoes_vazias = dict()
+        # Para cada estado do automato
+        for estado in transition_function:
+            transicoes_finais[estado] = []
+            transicoes_vazias[estado] = []
+            transicoes_nao_vazias[estado] = []
+            for transicao in transition_function.get(estado):
+                if transicao[0] != "ε":
+                    transicoes_finais[estado].append(transicao)
+                    transicoes_nao_vazias[estado].append(transicao)
+                else:
+                    transicoes_vazias[estado].append(transicao)
+                        
+        for estado in transition_function:
+            transicoes_nao_vazia_no_vertice = transicoes_nao_vazias.get(estado)
+            # Enquanto houverem transições vazias daquele estado para outro
+            while len(transicoes_nao_vazia_no_vertice) != 0:
+                # Analisando a Transição feita
+                transicao_analisada = transicoes_nao_vazia_no_vertice.pop()
+            
+                # Para cada transicao que o estado destino da transição possui
+                for transicao_do_estado_destino in transition_function.get(transicao_analisada[1]):
+                    if transicao_do_estado_destino[0] == "ε":
+                        if transicao_do_estado_destino not in transicoes_finais[estado]:
+                            nova_transicao = (transicao_analisada[0], transicao_do_estado_destino[1])
+                            transicoes_finais[estado].append(nova_transicao)
+                            transicoes_nao_vazia_no_vertice.append(nova_transicao)
+                        
+        for estado in transition_function:
+            transicoes_vazia_no_vertice = transicoes_vazias.get(estado)
+            # Enquanto houverem transições vazias daquele estado para outro
+            while len(transicoes_vazia_no_vertice) != 0:
+                # Analisando a Transição feita
+                transicao_analisada = transicoes_vazia_no_vertice.pop()
+                # Atualiza Estados Inciais e Estados Finais
+                if estado in initial_state:
+                    initial_state.append(transicao_analisada[1])
+                if transicao_analisada[1] in final_states:
+                    final_states.append(estado)
+                # Para cada transicao que o estado destino da transição possui
+                for transicao_do_estado_destino in transition_function.get(transicao_analisada[1]):
+                    if transicao_do_estado_destino[0] != "ε":
+                        if transicao_do_estado_destino not in transicoes_finais[estado]:
+                            transicoes_finais[estado].append(transicao_do_estado_destino)
+                    elif transicao_do_estado_destino not in transicoes_finais[estado]:
+                        transicoes_vazia_no_vertice.append(transicao_do_estado_destino)
+        
+        self.transition_function = transicoes_finais
+            
 
 
 
 def main():
     automata = NFA(states, input_symbols, transition_function, initial_state, final_states)
-    word = "acccccccccc"
+    word = "00000000001"
+    automata.removeTransicaoVazia() # Função para transformar o AFNe em AFN
+    print(automata.final_states)
     accepted = automata.process_word(word)
-
+    
     if accepted:
         print(f"\"{word}\" was accepted")
 
